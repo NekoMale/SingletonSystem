@@ -1,7 +1,7 @@
 ﻿namespace NamelessGames.SingletonSystem
 {
     /// <summary>
-    /// Use this for components on GameObjects who have a SingletonBehaviour or a SceneSingletonBehaviour.<br></br>
+    /// Use this for components on GameObjects who have a SingletonBehaviour.<br></br>
     /// Useful in order to inizialize singleton's component.
     /// </summary>
     public interface SingletonComponent
