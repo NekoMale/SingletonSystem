@@ -1,0 +1,13 @@
+{
+    "name": "namelessgames.singletonsystem",
+    "noEngineReferences": false,
+    "overrideReferences": false,
+    "allowUnsafeCode": false,
+    "autoReferenced": false,
+    "includePlatforms": [ "Editor" ],
+    "precompiledReferences": [],
+    "defineConstraints": [],
+    "excludePlatforms": [],
+    "versionDefines": [],
+    "references": []
+}
