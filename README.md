@@ -23,6 +23,8 @@ Called on GameObject childrens' SingletonComponent as well.
 
 ### SingletonBehaviour gameObject lifecycle:
 
-1. OnEnable() // At DefaultExecutionOrder = -100
-2. Initialize() // called inside OnEnable, so at DefaultExecutionOrder = -100
-3. SingletonComponents.Initialize() // called after SingletonBehaviour's Initialize inside OnEnable, so at DefaultExecutionOrder = -100 as well
+| Method | Order |
+| --- | --- |
+| OnEnable() | 1: At DefaultExecutionOrder = -100. <br/>**Note**: it should be executed after every Unity's monobehaviour and before every other custom monobehaviour if you don't edit Unity Execution Order |
+| Initialize() | 2: Called inside OnEnable |
+| SingletonComponents.Initialize() | Called after SingletonBehaviour's Initialize inside OnEnable, so SingletonBehaviour's T has been initialized yet and it's called before every other custom monobehaviour as well (OnEnable notes still apply) |
