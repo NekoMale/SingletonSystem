@@ -1,0 +1,23 @@
+{
+  "name": "com.namelessgames.singletonsystem",
+  "version": "0.0.1",
+  "displayName": "Singleton System",
+  "description": "This is a package in order to manage Singletons in Unity.",
+  "unity": "2021.3",
+  "documentationUrl": "https://github.com/NekoMale/SingletonSystem/blob/main/README.md",
+  "changelogUrl": "https://github.com/NekoMale/SingletonSystem/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/NekoMale/SingletonSystem/blob/main/LICENSE.md",
+  "dependencies": {
+  },
+  "keywords": [
+    "Singleton",
+    "Nameless",
+    "NamelessGames",
+    "SingletonSystem",
+    "ScriptableSingleton"
+  ],
+  "author": {
+    "name": "NamelessGames",
+    "email": "unity@example.com"
+  }
+}

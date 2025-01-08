@@ -6,9 +6,12 @@ namespace NamelessGames.SingletonSystem
     /// Don't inherit from this. Inherit from SingletonBehaviour<T> instead
     /// </summary>
     [DisallowMultipleComponent]
+    [DefaultExecutionOrder(-100)]
     public abstract class SingletonBehaviour : MonoBehaviour
     {
         private protected SingletonBehaviour() { }
+
+        protected abstract void OnEnable();
 
         public abstract void Instantiated();
     }
@@ -19,7 +22,8 @@ namespace NamelessGames.SingletonSystem
     /// <typeparam name="T">Type of SingletonBehaviour</typeparam>
     public abstract class SingletonBehaviour<T> : SingletonBehaviour where T : SingletonBehaviour<T>
     {
-        static bool _hasBeenInstantiated = false;
+        [SerializeField] bool _dontDestroyOnLoad;
+        static bool _initialized = false;
 
         public static T Instance { get; private set; }
 
@@ -31,15 +35,15 @@ namespace NamelessGames.SingletonSystem
         {
             get
             {
-                if (!_hasBeenInstantiated)
+                if (Instance == null)
                 {
-                    T instance = FindObjectOfType<T>();
-                    if (instance == null)
+                    Instance = FindObjectOfType<T>();
+                    if (Instance == null)
                     {
-                        Debug.LogError("Non esiste nessun SingletonBehaviour di tipo " + typeof(T) + "\nMetti in scena il SingletonBehaviour desiderato oppure aggiungilo nel SingletonInstantiator.");
+                        Debug.LogError($"Singleton<{typeof(T)} could not be instantiated: no object of type {typeof(T)} found.");
                         return null;
                     }
-                    instance.Instantiated();
+                    Instance.Instantiated();
                 }
                 return Instance;
             }
@@ -47,22 +51,24 @@ namespace NamelessGames.SingletonSystem
 
         public sealed override void Instantiated()
         {
-            if (!_hasBeenInstantiated)
+            if(Instance == null)
             {
                 Instance = (T)this;
-                OnInstantiate();
-
-                SingletonComponent[] singletonComponents = GetComponentsInChildren<SingletonComponent>();
-                for (int componentIndex = 0; componentIndex < singletonComponents.Length; componentIndex++)
-                {
-                    singletonComponents[componentIndex].OnInstantiate();
-                }
-                _hasBeenInstantiated = true;
             }
             else if (Instance != this)
             {
                 gameObject.SetActive(false);
                 Destroy(gameObject);
+                return;
+            }
+            if (!_initialized) // if Instance is this and it is not initialized yet
+            {
+                _initialized = true;
+                if(_dontDestroyOnLoad)
+                    DontDestroyOnLoad(gameObject);
+                
+                Initialize();
+                InitializeComponents();
             }
         }
 
@@ -71,9 +77,18 @@ namespace NamelessGames.SingletonSystem
         /// Always executed before everything in game and after this singleton Instance assignment.<br></br>
         /// Executed before every SingletonComponent initialization as well.
         /// </summary>
-        public virtual void OnInstantiate() { }
+        public virtual void Initialize() { }
 
-        private void OnEnable()
+        private void InitializeComponents()
+        {
+            SingletonComponent[] singletonComponents = GetComponentsInChildren<SingletonComponent>();
+            for (int componentIndex = 0; componentIndex < singletonComponents.Length; componentIndex++)
+            {
+                singletonComponents[componentIndex].Initialize();
+            }
+        }
+
+        protected sealed override void OnEnable()
         {
             Instantiated();
         }

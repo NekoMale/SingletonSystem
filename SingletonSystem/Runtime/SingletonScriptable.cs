@@ -3,45 +3,62 @@ using UnityEngine;
 
 namespace NamelessGames.SingletonSystem
 {
+    /// <summary>
+    /// Don't inherit from this. Inherit from SingletonScriptable<T> instead
+    /// </summary>
     public abstract class SingletonScriptable : ScriptableObject 
     {
         public abstract void Instantiated();
 
-        private void OnEnable()
+        protected abstract void OnEnable();
+    }
+
+    /// <summary>
+    /// Inherit this class in order to have your ScriptableObject as singleton.<br></br>
+    /// </summary>
+    /// <typeparam name="T">Type of SingletonScriptable</typeparam>
+    public abstract class SingletonScriptable<T> : SingletonScriptable where T : SingletonScriptable<T>
+    {
+        static T _instance;
+        public static T Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    T[] instances = Resources.LoadAll<T>("");
+                    if (instances.Length == 0)
+                    {
+                        Debug.LogError("No instance of " + typeof(T) + " found in Resources folder.");
+                        return null;
+                    }
+                    if (instances.Length > 1)
+                    {
+                        Debug.LogError("Multiple instances of " + typeof(T) + " found in Resources folder.");
+                        return null;
+                    }
+                    _instance = instances[0];
+                }
+                return _instance;
+            }
+        }
+
+        protected sealed override void OnEnable()
         {
             Instantiated();
         }
-    }
-
-    public abstract class SingletonScriptable<T> : SingletonScriptable where T : SingletonScriptable<T>
-    {
-        public static T Instance { get; private set; }
 
         public override sealed void Instantiated()
         {
-            if (Instance != null) { return; }
-            Instance = this as T;
-
-            OnInstantiate();
-        }
-
-        public virtual void OnInstantiate() { }
-
-#if UNITY_EDITOR
-        public static void CreateAsset()
-        {
-            var path = UnityEditor.EditorUtility.SaveFilePanelInProject("Save " + typeof(T) + " creation", typeof(T).ToString(), "asset", string.Empty);
-            if (string.IsNullOrEmpty(path))
+            if (Instance != null && Instance != this)
+                DestroyImmediate(this);
+            else if (Instance == this)
                 return;
 
-            var configObject = CreateInstance<T>();
-            UnityEditor.AssetDatabase.CreateAsset(configObject, path);
-
-            // Add the config asset to the build
-            var preloadedAssets = UnityEditor.PlayerSettings.GetPreloadedAssets().ToList();
-            preloadedAssets.Add(configObject);
-            UnityEditor.PlayerSettings.SetPreloadedAssets(preloadedAssets.ToArray());
+            _instance = this as T;
+            Initialize();
         }
-#endif
+
+        public virtual void Initialize() { }
     }
 }
